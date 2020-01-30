@@ -8,4 +8,10 @@
         android:icon="@drawable/baseline_save_black_24dp"
         android:title="Enregistrer"/>
 
+    <item
+        android:id="@+id/action_delete"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/baseline_delete_black_24dp"
+        android:title="Supprimer"/>
+
 </menu>

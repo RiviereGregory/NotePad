@@ -15,6 +15,9 @@ class NoteDetailActivity : AppCompatActivity() {
         val REQUEST_EDIT_NOTE = 1
         val EXTRA_NOTE = "note"
         val EXTRA_NOTE_INDEX = "noteIndex"
+
+        val ACTION_SAVE_NOTE = "gri.riverjach.ACTION_SAVE_NOTE"
+        val ACTION_DELETE_NOTE = "gri.riverjach.ACTION_DELETE_NOTE"
     }
 
     lateinit var note: Note
@@ -52,16 +55,41 @@ class NoteDetailActivity : AppCompatActivity() {
                 saveNote()
                 return true
             }
+            R.id.action_delete -> {
+                showConfirmDeleteNoteDialog()
+                return true
+            }
             else -> return super.onOptionsItemSelected(item)
         }
+    }
+
+    private fun showConfirmDeleteNoteDialog() {
+        val confirmFragment = ConfirmDeleteNoteFragment(note.title)
+        confirmFragment.listener = object : ConfirmDeleteNoteFragment.ConfirmDeleteDialogListener {
+            override fun onDialogPositiveClick() {
+                deleteNote()
+            }
+
+            override fun onDialogNegativedClick() {
+                // not use
+            }
+        }
+        confirmFragment.show(supportFragmentManager, "confirmDeleteDialog")
     }
 
     fun saveNote() {
         note.title = titleView.text.toString()
         note.text = textView.text.toString()
 
-        intent = Intent()
+        intent = Intent(ACTION_SAVE_NOTE)
         intent.putExtra(EXTRA_NOTE, note)
+        intent.putExtra(EXTRA_NOTE_INDEX, noteIndex)
+        setResult(Activity.RESULT_OK, intent)
+        finish()
+    }
+
+    fun deleteNote(){
+        intent = Intent(ACTION_DELETE_NOTE)
         intent.putExtra(EXTRA_NOTE_INDEX, noteIndex)
         setResult(Activity.RESULT_OK, intent)
         finish()
