@@ -3,6 +3,7 @@ package gri.riverjach
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.os.Parcelable
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +11,8 @@ import androidx.appcompat.widget.Toolbar
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import gri.riverjach.utils.loadNotes
+import gri.riverjach.utils.persistNote
 
 class NoteListActivity : AppCompatActivity(), View.OnClickListener {
 
@@ -25,17 +28,7 @@ class NoteListActivity : AppCompatActivity(), View.OnClickListener {
 
         findViewById<FloatingActionButton>(R.id.create_note_fab).setOnClickListener(this)
 
-        notes = mutableListOf<Note>()
-        notes.add(Note("Note 1", "blablablabla"))
-        notes.add(
-            Note(
-                "Memo Bob",
-                "Aenean eu nunc id nibh scelerisque vulputate. Pellentesque iaculis velit nec enim mattis faucibus"
-            )
-        )
-        notes.add(Note("Memo Bobette", "Duis sit amet commodo ex, vitae hendrerit nisl"))
-        notes.add(Note("pourquoi Kotlin ?", "Parce que"))
-
+        notes = loadNotes(this)
         adapter = NoteAdapter(notes, this)
 
         val recyclerView = findViewById<RecyclerView>(R.id.notes_recycler_view)
@@ -68,6 +61,7 @@ class NoteListActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     fun saveNote(note: Note, noteIndex: Int) {
+        persistNote(this, note)
         if (noteIndex < 0) {
             notes.add(0, note)
         } else {
@@ -80,7 +74,8 @@ class NoteListActivity : AppCompatActivity(), View.OnClickListener {
         if (noteIndex < 0){
             return
         }
-        notes.removeAt(noteIndex)
+        val note = notes.removeAt(noteIndex)
+        gri.riverjach.utils.deleteNote(this,note)
         adapter.notifyDataSetChanged()
     }
 
@@ -103,7 +98,7 @@ class NoteListActivity : AppCompatActivity(), View.OnClickListener {
         val note = if (noteIndex < 0) Note() else notes[noteIndex]
 
         val intent = Intent(this, NoteDetailActivity::class.java)
-        intent.putExtra(NoteDetailActivity.EXTRA_NOTE, note)
+        intent.putExtra(NoteDetailActivity.EXTRA_NOTE, note as Parcelable)
         intent.putExtra(NoteDetailActivity.EXTRA_NOTE_INDEX, noteIndex)
         startActivityForResult(intent, NoteDetailActivity.REQUEST_EDIT_NOTE)
     }
