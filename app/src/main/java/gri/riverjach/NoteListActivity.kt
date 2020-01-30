@@ -8,9 +8,11 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.snackbar.Snackbar
 import gri.riverjach.utils.loadNotes
 import gri.riverjach.utils.persistNote
 
@@ -18,6 +20,7 @@ class NoteListActivity : AppCompatActivity(), View.OnClickListener {
 
     lateinit var notes: MutableList<Note>
     lateinit var adapter: NoteAdapter
+    lateinit var coordinatorLayout: CoordinatorLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +37,8 @@ class NoteListActivity : AppCompatActivity(), View.OnClickListener {
         val recyclerView = findViewById<RecyclerView>(R.id.notes_recycler_view)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
+
+        coordinatorLayout = findViewById(R.id.coordinator_layout)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -48,7 +53,7 @@ class NoteListActivity : AppCompatActivity(), View.OnClickListener {
     private fun processEditNoteResult(data: Intent) {
         val noteIndex = data.getIntExtra(NoteDetailActivity.EXTRA_NOTE_INDEX, -1)
 
-        when (data.action){
+        when (data.action) {
             NoteDetailActivity.ACTION_SAVE_NOTE -> {
                 val note = data.getParcelableExtra<Note>(NoteDetailActivity.EXTRA_NOTE)
                 saveNote(note, noteIndex)
@@ -71,12 +76,15 @@ class NoteListActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun deleteNote(noteIndex: Int) {
-        if (noteIndex < 0){
+        if (noteIndex < 0) {
             return
         }
         val note = notes.removeAt(noteIndex)
-        gri.riverjach.utils.deleteNote(this,note)
+        gri.riverjach.utils.deleteNote(this, note)
         adapter.notifyDataSetChanged()
+
+        Snackbar.make(coordinatorLayout, "${note.title} supprimé", Snackbar.LENGTH_SHORT)
+            .show()
     }
 
     override fun onClick(view: View) {
